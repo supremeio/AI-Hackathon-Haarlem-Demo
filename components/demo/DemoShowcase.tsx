@@ -247,9 +247,17 @@ export function DemoShowcase() {
           <div
             ref={scrollRef}
             className="no-scrollbar absolute left-0 right-0 top-[225px] overflow-y-auto scroll-smooth"
-            // Cap the visible thread so it scrolls like a chat (latest in view),
-            // making the rewind-to-top during generation visible on any screen.
-            style={{ bottom: bottomH + 48, maxHeight: 280 }}
+            // A capped, scrollable window (chat-style) so the rewind-to-top on
+            // generation is visible. Soft-fade the top/bottom edges so clipped
+            // content fades out instead of hard-cutting mid-line.
+            style={{
+              bottom: bottomH + 48,
+              maxHeight: 300,
+              maskImage:
+                "linear-gradient(to bottom, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%)",
+            }}
           >
             <QnATree nodes={nodes} />
           </div>
