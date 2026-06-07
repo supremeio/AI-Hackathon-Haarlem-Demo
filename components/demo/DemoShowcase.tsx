@@ -247,7 +247,9 @@ export function DemoShowcase() {
           <div
             ref={scrollRef}
             className="no-scrollbar absolute left-0 right-0 top-[225px] overflow-y-auto scroll-smooth"
-            style={{ bottom: bottomH + 48 }}
+            // Cap the visible thread so it scrolls like a chat (latest in view),
+            // making the rewind-to-top during generation visible on any screen.
+            style={{ bottom: bottomH + 48, maxHeight: 280 }}
           >
             <QnATree nodes={nodes} />
           </div>
