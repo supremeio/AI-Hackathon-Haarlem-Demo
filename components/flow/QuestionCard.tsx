@@ -63,8 +63,6 @@ export function QuestionCard({
       </p>
 
       <AnimateHeight className="w-full rounded-[38px] border border-solid border-stroke bg-white">
-        {/* Keyed by the question so each new question/follow-up eases in fluidly. */}
-        <div key={`${parentQuestion ?? ""}|${question}`} className="animate-q-swap">
         {/* Follow-up banner — references the parent question */}
         {parentQuestion && (
           <div className="flex w-full flex-col items-start p-[4px]">
@@ -193,7 +191,6 @@ export function QuestionCard({
               </div>
             )}
           </div>
-        </div>
         </div>
         </div>
       </AnimateHeight>
