@@ -7,7 +7,7 @@ export function DemoCursor({ x, y, down }: { x: number; y: number; down: boolean
       className="pointer-events-none fixed left-0 top-0 z-[100]"
       style={{
         transform: `translate(${x}px, ${y}px)`,
-        transition: "transform 650ms cubic-bezier(0.65, 0, 0.35, 1)",
+        transition: "transform 250ms cubic-bezier(0.65, 0, 0.35, 1)",
         willChange: "transform",
       }}
     >

@@ -22,7 +22,7 @@ import type { AnswerNode, GenerationStage } from "@/types";
 
 type Phase = "home" | "questions" | "generating" | "result";
 const noop = () => {};
-const MOVE_MS = 650; // keep in sync with DemoCursor's transition duration
+const MOVE_MS = 250; // cursor glide duration — keep in sync with DemoCursor's transition
 
 const STAGES = (s: ("done" | "active" | "pending")[]): GenerationStage[] => [
   { id: "analyze", label: "Analyzing your inputs", status: s[0] },
@@ -67,7 +67,11 @@ export function DemoShowcase() {
 
   useEffect(() => {
     const alive = { current: true };
-    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+    // One speed knob for the whole demo: every pause and typing speed is scaled
+    // by SPEED, so a full loop lands around 20s. Lower = faster.
+    const SPEED = 0.38;
+    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, Math.round(ms * SPEED)));
+    const rawSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
     async function type(setter: (v: string) => void, text: string, speed: number) {
       for (let i = 1; i <= text.length; i++) {
@@ -81,7 +85,7 @@ export function DemoShowcase() {
 
     async function moveTo(x: number, y: number) {
       setCursor((c) => ({ ...c, x, y }));
-      await sleep(MOVE_MS);
+      await rawSleep(MOVE_MS); // unscaled — matches the cursor's CSS transition
     }
     async function moveToSel(sel: string) {
       const el = q(sel);
@@ -185,7 +189,7 @@ export function DemoShowcase() {
       setActive(null); setDraft(""); setPhase("generating");
       void moveTo(760, 430);
       await sleep(260); if (!alive.current) return; // let the composer swap settle first
-      if (scrollRef.current) easeScrollTop(scrollRef.current, 700);
+      if (scrollRef.current) easeScrollTop(scrollRef.current, 360);
       setStages(STAGES(["active", "pending", "pending"]));
       await sleep(1200); if (!alive.current) return;
       setStages(STAGES(["done", "active", "pending"]));
@@ -316,7 +320,7 @@ export function DemoShowcase() {
         <>
           <div className="absolute inset-0 animate-fade-in bg-[#25144A]/40" aria-hidden />
           <div key={loop} className="absolute right-0 top-0 h-full animate-slide-in-right">
-            <ResultPanel result={DEMO_RESULT} onClose={noop} autoAdvanceMs={1800} />
+            <ResultPanel result={DEMO_RESULT} onClose={noop} autoAdvanceMs={750} />
           </div>
         </>
       )}
