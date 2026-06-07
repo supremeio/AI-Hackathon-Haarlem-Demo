@@ -57,7 +57,7 @@ export function DemoShowcase() {
   const [bottomEl, setBottomEl] = useState<HTMLDivElement | null>(null);
   const [bottomH, setBottomH] = useState(0);
   useEffect(() => {
-    if (!bottomEl) { setBottomH(0); return; }
+    if (!bottomEl) return; // keep the last height through the card↔composer swap
     const update = () => setBottomH(bottomEl.offsetHeight);
     update();
     const ro = new ResizeObserver(update);
@@ -96,6 +96,21 @@ export function DemoShowcase() {
       await sleep(150);
     }
     const SEND = 'button[aria-label="Send"], button[aria-label="Submit answer"]';
+
+    // Manual eased scroll-to-top — robust against CSS scroll-behavior and the
+    // card→composer resize, which can cancel a native smooth scroll.
+    function easeScrollTop(el: HTMLElement, duration = 700) {
+      const start = el.scrollTop;
+      if (start <= 1) return;
+      const t0 = performance.now();
+      const frame = (now: number) => {
+        if (!alive.current || !el.isConnected) return;
+        const p = Math.min(1, (now - t0) / duration);
+        el.scrollTop = start * Math.pow(1 - p, 3); // easeOut to 0
+        if (p < 1) requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    }
 
     async function playOnce() {
       // reset
@@ -169,8 +184,8 @@ export function DemoShowcase() {
       // 4) generating — drift the cursor to centre and rewind the thread to the top
       setActive(null); setDraft(""); setPhase("generating");
       void moveTo(760, 430);
-      await sleep(220); if (!alive.current) return; // let the composer swap settle first
-      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      await sleep(260); if (!alive.current) return; // let the composer swap settle first
+      if (scrollRef.current) easeScrollTop(scrollRef.current, 700);
       setStages(STAGES(["active", "pending", "pending"]));
       await sleep(1200); if (!alive.current) return;
       setStages(STAGES(["done", "active", "pending"]));
