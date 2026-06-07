@@ -53,21 +53,6 @@ export function DemoShowcase() {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Follow the latest answer while questions are being asked.
-  useEffect(() => {
-    if (phase === "questions" && nodes.length && scrollRef.current) {
-      const el = scrollRef.current;
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    }
-  }, [nodes, phase]);
-
-  // When generation starts, glide the thread back up to the first question.
-  useEffect(() => {
-    if (phase === "generating") {
-      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [phase]);
-
   // Measure the bottom input block so the conversation scroll keeps 24px clear of it.
   const [bottomEl, setBottomEl] = useState<HTMLDivElement | null>(null);
   const [bottomH, setBottomH] = useState(0);
@@ -176,11 +161,16 @@ export function DemoShowcase() {
         }
         setNodes([...built]);
         await sleep(450); if (!alive.current) return;
+        // follow the latest answer down the thread
+        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+        await sleep(250); if (!alive.current) return;
       }
 
-      // 4) generating — drift the cursor to centre
+      // 4) generating — drift the cursor to centre and rewind the thread to the top
       setActive(null); setDraft(""); setPhase("generating");
       void moveTo(760, 430);
+      await sleep(220); if (!alive.current) return; // let the composer swap settle first
+      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
       setStages(STAGES(["active", "pending", "pending"]));
       await sleep(1200); if (!alive.current) return;
       setStages(STAGES(["done", "active", "pending"]));
